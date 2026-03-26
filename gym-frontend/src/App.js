@@ -10,13 +10,13 @@ import Entrenador from "./pages/Entrenador";
 import Recepcion from "./pages/Recepcion";
 import AdminClientes from "./pages/Admin-clientes";
 
-// 🔹 PROTECCIÓN DE RUTAS
+//  PROTECCIÓN DE RUTAS
 const PrivateRoute = ({ children }) => {
   const user = JSON.parse(localStorage.getItem("user"));
   return user ? children : <Navigate to="/" />;
 };
 
-// 🔹 RUTA SEGÚN ROL
+// RUTA SEGÚN ROL
 const RoleRoute = ({ children, roles }) => {
   const user = JSON.parse(localStorage.getItem("user"));
   if (!user) return <Navigate to="/" />;
@@ -27,11 +27,11 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* 🔓 RUTAS PÚBLICAS */}
+        {/*  RUTAS PÚBLICAS */}
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* 🔐 RUTAS PRIVADAS */}
+        {/*  RUTAS PRIVADAS */}
         <Route
           path="/dashboard"
           element={
@@ -101,7 +101,7 @@ function App() {
           }
         />
 
-        {/* 🔹 Ruta por defecto */}
+        {/* Ruta por defecto */}
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
     </BrowserRouter>

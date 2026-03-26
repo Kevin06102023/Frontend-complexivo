@@ -40,13 +40,29 @@ function Login() {
   };
 
   return (
-    <div>
-      <h2>Login</h2>
+    <div style={{
+      maxWidth: "400px",
+      margin: "50px auto",
+      padding: "30px",
+      border: "1px solid #ccc",
+      borderRadius: "10px",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+      textAlign: "center",
+      fontFamily: "Arial, sans-serif"
+    }}>
+      <h2 style={{ marginBottom: "20px", color: "#333" }}>Login</h2>
 
       <input
         type="text"
         placeholder="Usuario"
         onChange={(e) => setUsername(e.target.value)}
+        style={{
+          width: "80%",
+          padding: "10px",
+          marginBottom: "10px",
+          borderRadius: "5px",
+          border: "1px solid #ccc"
+        }}
       />
 
       <br />
@@ -55,11 +71,39 @@ function Login() {
         type="password"
         placeholder="Contraseña"
         onChange={(e) => setPassword(e.target.value)}
+        style={{
+          width: "80%",
+          padding: "10px",
+          marginBottom: "20px",
+          borderRadius: "5px",
+          border: "1px solid #ccc"
+        }}
       />
 
-      <br /><br />
+      <br />
 
-      <button onClick={handleLogin}>Ingresar</button>
+      <button
+        onClick={handleLogin}
+        style={{
+          width: "85%",
+          padding: "10px",
+          border: "none",
+          borderRadius: "5px",
+          backgroundColor: "#007BFF",
+          color: "#fff",
+          fontSize: "16px",
+          cursor: "pointer"
+        }}
+      >
+        Ingresar
+      </button>
+
+      <p style={{ marginTop: "20px" }}>
+        ¿No tienes cuenta?{" "}
+        <a href="/register" style={{ color: "#007BFF", textDecoration: "none" }}>
+          Regístrate aquí
+        </a>
+      </p>
     </div>
   );
 }

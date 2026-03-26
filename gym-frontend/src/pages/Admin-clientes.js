@@ -3,21 +3,24 @@ import axios from "axios";
 
 function AdminClientes() {
   const [clientes, setClientes] = useState([]);
+  const [cliente, setCliente] = useState({
+    id: null,       // Para saber si estamos editando
+    cedula: "",
+    nombre: "",
+    apellido: "",
+    email: "",
+    telefono: ""
+  });
 
-  const [nombre, setNombre] = useState("");
-  const [apellido, setApellido] = useState("");
-  const [email, setEmail] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [cedula, setCedula] = useState(""); // 🔹 Nueva
-  const [editingId, setEditingId] = useState(null);
-
-  // 🔹 Obtener clientes
+  // Cargar clientes
   const getClientes = async () => {
     try {
       const res = await axios.get("http://localhost:8080/api/clientes");
-      setClientes(res.data);
-    } catch (error) {
-      console.error(error);
+      const data = Array.isArray(res.data) ? res.data : Array.isArray(res.data.data) ? res.data.data : [];
+      setClientes(data);
+    } catch (err) {
+      console.error("Error al cargar clientes:", err);
+      setClientes([]);
     }
   };
 
@@ -25,99 +28,142 @@ function AdminClientes() {
     getClientes();
   }, []);
 
-  // 🔹 Guardar cliente
+  // Crear o actualizar cliente
   const guardarCliente = async () => {
-    if (!cedula || cedula.trim() === "0") {
-      alert("La cédula es obligatoria y no puede ser 0");
+    if (!cliente.cedula || !cliente.nombre || !cliente.apellido || !cliente.email || !cliente.telefono) {
+      alert("Por favor completa todos los campos");
       return;
     }
 
     try {
-      const data = {
-        nombre,
-        apellido,
-        email,
-        telefono,
-        cedula // 🔹 enviamos cedula
-      };
-
-      if (editingId) {
-        await axios.put(`http://localhost:8080/api/clientes/${editingId}`, data);
+      if (cliente.id) {
+        await axios.put(`http://localhost:8080/api/clientes/${cliente.id}`, cliente);
         alert("Cliente actualizado");
       } else {
-        await axios.post("http://localhost:8080/api/clientes", data);
+        await axios.post("http://localhost:8080/api/clientes", cliente);
         alert("Cliente creado");
       }
 
-      limpiarFormulario();
+      setCliente({ id: null, cedula: "", nombre: "", apellido: "", email: "", telefono: "" });
       getClientes();
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error("Error al guardar cliente:", err);
       alert("Error al guardar cliente");
     }
   };
 
+  // Cargar cliente en formulario para editar
   const editarCliente = (c) => {
-    setNombre(c.nombre);
-    setApellido(c.apellido);
-    setEmail(c.email);
-    setTelefono(c.telefono);
-    setCedula(c.cedula); // 🔹 llenamos cedula al editar
-    setEditingId(c.id);
+    setCliente({
+      id: c.id,
+      cedula: c.cedula || "",
+      nombre: c.nombre || "",
+      apellido: c.apellido || "",
+      email: c.email || "",
+      telefono: c.telefono || ""
+    });
   };
 
+  // Eliminar cliente
   const eliminarCliente = async (id) => {
+    if (!window.confirm("¿Seguro que deseas eliminar este cliente?")) return;
     try {
       await axios.delete(`http://localhost:8080/api/clientes/${id}`);
       alert("Cliente eliminado");
       getClientes();
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error("Error al eliminar cliente:", err);
       alert("Error al eliminar cliente");
     }
   };
 
-  const limpiarFormulario = () => {
-    setNombre("");
-    setApellido("");
-    setEmail("");
-    setTelefono("");
-    setCedula(""); // 🔹 limpiamos cedula
-    setEditingId(null);
-  };
-
   return (
-    <div>
-      <h2>Admin - Clientes</h2>
-
-      {/* 🔹 FORM */}
-      <input placeholder="Nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} />
-      <input placeholder="Apellido" value={apellido} onChange={(e) => setApellido(e.target.value)} />
-      <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-      <input placeholder="Teléfono" value={telefono} onChange={(e) => setTelefono(e.target.value)} />
-      <input placeholder="Cédula" value={cedula} onChange={(e) => setCedula(e.target.value)} /> {/* 🔹 nuevo */}
-
-      <button onClick={guardarCliente}>
-        {editingId ? "Actualizar" : "Crear"}
+    <div style={{ maxWidth: "700px", margin: "50px auto", padding: "25px", backgroundColor: "#fdfdfd", borderRadius: "10px", fontFamily: "Arial, sans-serif", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+      
+      {/* Botón para regresar al dashboard */}
+      <button
+        onClick={() => window.location.href = "/dashboard"}
+        style={{ marginBottom: "20px", padding: "10px 15px", borderRadius: "5px", border: "none", backgroundColor: "#6c757d", color: "#fff", cursor: "pointer", fontWeight: "bold" }}
+      >
+        ← Volver al Dashboard
       </button>
 
-      {editingId && <button onClick={limpiarFormulario}>Cancelar</button>}
+      <h2 style={{ textAlign: "center", color: "#333", marginBottom: "20px" }}>Administrar Clientes</h2>
 
-      <hr />
+      {/* Formulario */}
+      <div style={{ marginBottom: "30px" }}>
+        <input
+          placeholder="Cédula"
+          value={cliente.cedula}
+          onChange={e => setCliente({ ...cliente, cedula: e.target.value })}
+          style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc", marginBottom: "10px" }}
+        />
+        <input
+          placeholder="Nombre"
+          value={cliente.nombre}
+          onChange={e => setCliente({ ...cliente, nombre: e.target.value })}
+          style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc", marginBottom: "10px" }}
+        />
+        <input
+          placeholder="Apellido"
+          value={cliente.apellido}
+          onChange={e => setCliente({ ...cliente, apellido: e.target.value })}
+          style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc", marginBottom: "10px" }}
+        />
+        <input
+          placeholder="Email"
+          value={cliente.email}
+          onChange={e => setCliente({ ...cliente, email: e.target.value })}
+          style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc", marginBottom: "10px" }}
+        />
+        <input
+          placeholder="Teléfono"
+          value={cliente.telefono}
+          onChange={e => setCliente({ ...cliente, telefono: e.target.value })}
+          style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc", marginBottom: "10px" }}
+        />
 
-      {/* 🔹 LISTA */}
-      {clientes.map((c) => (
-        <div key={c.id} style={{ border: "1px solid black", margin: 10, padding: 5 }}>
-          <p><strong>{c.nombre} {c.apellido}</strong></p>
-          <p>Email: {c.email}</p>
-          <p>Teléfono: {c.telefono}</p>
-          <p>Cédula: {c.cedula}</p> {/* 🔹 mostramos cedula */}
-          <p>QR: {c.qrCode}</p> {/* 🔹 mostramos qrCode generado */}
+        <button
+          onClick={guardarCliente}
+          style={{ width: "100%", padding: "12px", borderRadius: "5px", border: "none", backgroundColor: "#28a745", color: "#fff", cursor: "pointer", fontWeight: "bold", marginBottom: "10px" }}
+        >
+          {cliente.id ? "Guardar Cambios" : "Crear Cliente"}
+        </button>
+      </div>
 
-          <button onClick={() => editarCliente(c)}>Editar</button>
-          <button onClick={() => eliminarCliente(c.id)}>Eliminar</button>
-        </div>
-      ))}
+      {/* Lista de clientes */}
+      <h3>Clientes Registrados</h3>
+      {Array.isArray(clientes) && clientes.length > 0 ? (
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr>
+              <th style={{ borderBottom: "1px solid #ccc", padding: "8px" }}>Cédula</th>
+              <th style={{ borderBottom: "1px solid #ccc", padding: "8px" }}>Nombre</th>
+              <th style={{ borderBottom: "1px solid #ccc", padding: "8px" }}>Apellido</th>
+              <th style={{ borderBottom: "1px solid #ccc", padding: "8px" }}>Email</th>
+              <th style={{ borderBottom: "1px solid #ccc", padding: "8px" }}>Teléfono</th>
+              <th style={{ borderBottom: "1px solid #ccc", padding: "8px" }}>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {clientes.map(c => (
+              <tr key={c.id}>
+                <td style={{ padding: "8px", borderBottom: "1px solid #eee" }}>{c.cedula}</td>
+                <td style={{ padding: "8px", borderBottom: "1px solid #eee" }}>{c.nombre}</td>
+                <td style={{ padding: "8px", borderBottom: "1px solid #eee" }}>{c.apellido}</td>
+                <td style={{ padding: "8px", borderBottom: "1px solid #eee" }}>{c.email}</td>
+                <td style={{ padding: "8px", borderBottom: "1px solid #eee" }}>{c.telefono}</td>
+                <td style={{ padding: "8px", borderBottom: "1px solid #eee" }}>
+                  <button onClick={() => editarCliente(c)} style={{ marginRight: "5px", padding: "5px 10px", borderRadius: "5px", border: "none", backgroundColor: "#007bff", color: "#fff", cursor: "pointer" }}>Editar</button>
+                  <button onClick={() => eliminarCliente(c.id)} style={{ padding: "5px 10px", borderRadius: "5px", border: "none", backgroundColor: "#dc3545", color: "#fff", cursor: "pointer" }}>Eliminar</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p>No hay clientes registrados.</p>
+      )}
     </div>
   );
 }
